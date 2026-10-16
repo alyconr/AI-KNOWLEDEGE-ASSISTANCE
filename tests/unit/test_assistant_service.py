@@ -1,6 +1,6 @@
 import pytest
 
-from app.services.assistance_service import (
+from app.services.assistant_service import (
     BootstrapAssistantService,
 )
 

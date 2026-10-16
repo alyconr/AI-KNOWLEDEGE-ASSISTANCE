@@ -1,49 +1,44 @@
-from app.schemas.chat import ChatResponse
+
+from app.providers.base import LLMProvider
 
 
-class BootstrapAssistantService:
-    _knowledge = {
-        "fastapi": (
-            "FastAPI es un framework de Python para "
-            "construir APIs basado en type hints y ASGI."
-        ),
-        "pydantic": (
-            "Pydantic valida y serializa datos a partir "
-            "de anotaciones de tipo de Python."
-        ),
-        "asyncio": (
-            "AsyncIO permite escribir código concurrente "
-            "con async y await para tareas orientadas a E/S."
-        ),
-        "httpx": (
-            "HTTPX es un cliente HTTP para Python con "
-            "interfaces síncrona y asíncrona."
-        ),
-        "pytest": (
-            "pytest es un framework de pruebas para Python "
-            "con descubrimiento automático, asserts y fixtures."
-        ),
-    }
+SYSTEM_PROMPT = """
+Eres AI Knowledge Assistant, un asistente
+educativo especializado en tecnología.
 
-    async def answer(
+Responde en español claro.
+Explica los conceptos con ejemplos sencillos.
+Si no tienes suficiente información, indícalo.
+No inventes referencias ni datos.
+""".strip()
+
+
+class AssistantService:
+    def __init__(self, provider: LLMProvider):
+        self.provider = provider
+
+    async def ask(
         self,
         question: str,
-    ) -> ChatResponse:
+        temperature: float = 0.3,
+        top_p: float = 1.0,
+        max_tokens: int = 300,
+    ) -> str:
 
-        normalized_question = question.lower()
+        messages = [
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT,
+            },
+            {
+                "role": "user",
+                "content": question,
+            },
+        ]
 
-        for keyword, answer in self._knowledge.items():
-            if keyword in normalized_question:
-                return ChatResponse(
-                    answer=answer,
-                    provider="bootstrap-local",
-                )
-
-        return ChatResponse(
-            answer=(
-                "La API está operativa. "
-                "En el siguiente módulo conectaremos "
-                "el primer LLM."
-            ),
-            provider="bootstrap-local",
+        return await self.provider.generate(
+            messages=messages,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
         )

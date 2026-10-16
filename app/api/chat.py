@@ -1,4 +1,6 @@
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.config import get_settings
@@ -9,6 +11,8 @@ from app.providers.openrouter import (
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.services.assistant_service import AssistantService
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["Chat"])
 
@@ -40,10 +44,11 @@ async def chat(
             max_tokens=request.max_tokens,
         )
 
-    except LLMProviderError:
+    except LLMProviderError as exc:
+        logger.error("Fallo del proveedor LLM: %s", exc, exc_info=exc.__cause__)
         raise HTTPException(
             status_code=502,
-            detail="No fue posible obtener una respuesta del LLM",
+            detail=f"No fue posible obtener una respuesta del LLM: {exc}",
         )
 
     return ChatResponse(

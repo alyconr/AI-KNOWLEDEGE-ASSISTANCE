@@ -4,7 +4,7 @@ from app.schemas.chat import (
     ChatRequest,
     ChatResponse,
 )
-from app.services.assistance_service import (
+from app.services.assistant_service import (
     BootstrapAssistantService,
 )
 

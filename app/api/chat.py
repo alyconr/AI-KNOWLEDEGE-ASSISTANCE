@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["Chat"])
 
 
-def get_assistant_service() -> AssistantService:
-    settings = get_settings()
+def get_assistant_service() -> AssistantService: 
+    settings = get_settings() # valida la configuración de OpenRouter desde las variables de entorno
 
     provider = OpenRouterProvider(
         api_key=settings.openrouter_api_key,

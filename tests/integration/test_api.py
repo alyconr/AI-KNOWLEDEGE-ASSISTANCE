@@ -1,68 +1,88 @@
+
 import pytest
-from httpx import ASGITransport, AsyncClient
+
+from httpx import (
+    ASGITransport,
+    AsyncClient,
+)
 
 from app.main import app
 
+from app.api.agent import (
+    get_agent_service,
+)
+
+from app.services.agent_service import (
+    AgentService,
+)
+
+
+class FakeProvider:
+
+    async def complete_with_tools(
+        self,
+        messages,
+        tools,
+        temperature=0.3,
+        top_p=1,
+        max_tokens=300,
+    ):
+        return {
+            "content": "Respuesta educativa"
+        }
+
 
 @pytest.mark.asyncio
-async def test_health() -> None:
-    transport = ASGITransport(app=app)
+async def test_agent_endpoint():
 
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test",
-    ) as client:
-
-        response = await client.get(
-            "/health"
-        )
-
-    assert response.status_code == 200
-
-    assert (
-        response.json()["status"]
-        == "ok"
+    app.dependency_overrides[
+        get_agent_service
+    ] = lambda: AgentService(
+        FakeProvider()
     )
 
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as client:
+
+            response = await client.post(
+                "/api/v1/agent/chat",
+                json={
+                    "question": "¿Qué es RAG?"
+                },
+            )
+
+        assert response.status_code == 200
+
+        assert (
+            response.json()["answer"]
+            == "Respuesta educativa"
+        )
+
+        assert (
+            response.json()["tools_used"]
+            == []
+        )
+
+    finally:
+        app.dependency_overrides.clear()
+
 
 @pytest.mark.asyncio
-async def test_chat_ok() -> None:
-    transport = ASGITransport(app=app)
+async def test_agent_rejects_invalid():
 
     async with AsyncClient(
-        transport=transport,
+        transport=ASGITransport(app=app),
         base_url="http://test",
     ) as client:
 
         response = await client.post(
-            "/api/v1/chat",
+            "/api/v1/agent/chat",
             json={
-                "question":
-                    "Explícame Pydantic"
-            },
-        )
-
-    assert response.status_code == 200
-
-    assert (
-        response.json()["provider"]
-        == "bootstrap-local"
-    )
-
-
-@pytest.mark.asyncio
-async def test_chat_rejects_short_question() -> None:
-    transport = ASGITransport(app=app)
-
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test",
-    ) as client:
-
-        response = await client.post(
-            "/api/v1/chat",
-            json={
-                "question": "a"
+                "question": "x",
+                "max_steps": 6,
             },
         )
 

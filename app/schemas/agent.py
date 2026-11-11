@@ -22,6 +22,5 @@ class AgentChatRequest(ChatRequest):
         ),
     )
 
-
 class AgentChatResponse(ChatResponse):
     tools_used: list[str]

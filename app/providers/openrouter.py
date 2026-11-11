@@ -10,7 +10,7 @@ class LLMProviderError(Exception):
 
 class OpenRouterProvider:
 
-    def __init__(
+    def __init__( 
         self,
         api_key: str,
         model: str,
@@ -22,12 +22,12 @@ class OpenRouterProvider:
 
     async def _request(
         self,
-        messages: list[dict[str, Any]],
+        messages: list[dict[str, Any]], 
         temperature: float,
         top_p: float,
         max_tokens: int,
         tools: list[dict[str, Any]] | None = None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]: 
 
         if not self.api_key:
             raise LLMProviderError(
@@ -112,7 +112,7 @@ class OpenRouterProvider:
                 "Formato de respuesta LLM inválido"
             ) from exc
 
-    async def generate(
+    async def generate( 
         self,
         messages: list[dict[str, str]],
         temperature: float = 0.3,
@@ -120,7 +120,7 @@ class OpenRouterProvider:
         max_tokens: int = 300,
     ) -> str:
 
-        message = await self._request(
+        message = await self._request( 
             messages,
             temperature,
             top_p,

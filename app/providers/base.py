@@ -1,5 +1,5 @@
 
-from typing import Protocol
+from typing import Any, Protocol
 
 
 class LLMProvider(Protocol):

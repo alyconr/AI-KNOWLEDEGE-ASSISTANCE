@@ -33,7 +33,7 @@ router = APIRouter(
 )
 
 
-def get_agent_service() -> AgentService:
+def get_agent_service() -> AgentService: 
     settings = get_settings()
 
     provider = OpenRouterProvider(

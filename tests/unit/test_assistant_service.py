@@ -1,24 +1,42 @@
+
 import pytest
 
 from app.services.assistant_service import (
-    BootstrapAssistantService,
+    AssistantService,
 )
 
 
-@pytest.mark.asyncio
-async def test_returns_known_answer() -> None:
-    service = BootstrapAssistantService()
+class FakeProvider:
 
-    response = await service.answer(
+    async def generate(
+        self,
+        messages,
+        temperature=0.3,
+        top_p=1,
+        max_tokens=300,
+    ):
+        assert (
+            messages[1]["content"]
+            == "¿Qué es FastAPI?"
+        )
+
+        return (
+            "Es un framework de APIs en Python."
+        )
+
+
+@pytest.mark.asyncio
+async def test_returns_answer():
+
+    service = AssistantService(
+        FakeProvider()
+    )
+
+    response = await service.ask(
         "¿Qué es FastAPI?"
     )
 
     assert (
-        response.provider
-        == "bootstrap-local"
-    )
-
-    assert (
         "framework"
-        in response.answer.lower()
+        in response.lower()
     )

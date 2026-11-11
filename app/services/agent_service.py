@@ -38,11 +38,11 @@ class AgentService:
 
     def __init__(
         self,
-        provider: ToolCallingProvider,
+        provider: ToolCallingProvider, 
     ):
-        self.provider = provider
+        self.provider = provider 
 
-    async def ask(
+    async def ask( 
         self,
         question: str,
         *,
